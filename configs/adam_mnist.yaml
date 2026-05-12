@@ -1,0 +1,32 @@
+optimizer:
+  name: adam
+  lr: 0.001
+  beta1: 0.9
+  beta2: 0.999
+  epsilon: 1.0e-8
+
+scheduler:
+  name: none
+
+train:
+  dataset: mnist
+  model: mlp
+  epochs: 20
+  batch_size: 128
+  seed: 42
+  grad_clip: null
+  eval_every: 1
+  early_stopping_patience: 5
+
+mlflow:
+  enabled: true
+  experiment_name: optimizer-comparison-mnist
+  run_name: adam_lr0.001
+
+mlp:
+  input_dim: 784
+  hidden_dims: [256, 128]
+  output_dim: 10
+  dropout: 0.2
+  activation: relu
+  batch_norm: true

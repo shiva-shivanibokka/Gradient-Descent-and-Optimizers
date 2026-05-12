@@ -1,0 +1,32 @@
+optimizer:
+  name: lion
+  lr: 1.0e-4       # Lion needs ~10x smaller LR than Adam
+  beta1: 0.9
+  beta: 0.99
+  weight_decay: 0.01
+
+scheduler:
+  name: none
+
+train:
+  dataset: mnist
+  model: mlp
+  epochs: 20
+  batch_size: 128
+  seed: 42
+  grad_clip: 1.0    # Lion benefits from grad clipping
+  eval_every: 1
+  early_stopping_patience: 5
+
+mlflow:
+  enabled: true
+  experiment_name: optimizer-comparison-mnist
+  run_name: lion_lr1e-4
+
+mlp:
+  input_dim: 784
+  hidden_dims: [256, 128]
+  output_dim: 10
+  dropout: 0.2
+  activation: relu
+  batch_norm: true

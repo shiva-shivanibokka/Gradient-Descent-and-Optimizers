@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  # ── Gradio app ─────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      target: app
+    ports:
+      - "7860:7860"
+    volumes:
+      # Mount mlruns for persistence across container restarts
+      - ./mlruns:/app/mlruns
+      # Mount data dir so MNIST/CIFAR-10 downloads persist
+      - ./data:/app/data
+    environment:
+      - PYTHONPATH=/app/src
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import gdo; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── MLflow tracking server (optional — for viewing experiment results) ────
+  mlflow:
+    image: python:3.11-slim
+    command: >
+      bash -c "pip install mlflow --quiet &&
+               mlflow server
+               --host 0.0.0.0
+               --port 5000
+               --backend-store-uri /mlruns
+               --default-artifact-root /mlruns"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlruns
+    restart: unless-stopped
+    profiles:
+      # Only start with: docker-compose --profile mlflow up
+      - mlflow
