@@ -8,13 +8,14 @@ Tests verify:
   2. Gradient is zero (or near-zero) at the global minimum
   3. Meshgrid returns correct shapes
   4. run_optimizer records a trajectory
+  5. All optimizers CONVERGE to the QuadraticSurface minimum (functional test)
 """
 
 import numpy as np
 import pytest
 
 from gdo.landscapes import Beale, Himmelblau, QuadraticSurface, Rosenbrock
-from gdo.optimizers import BatchGD
+from gdo.optimizers import Adam, AdamW, BatchGD, MomentumSGD, RMSProp
 
 
 class TestQuadraticSurface:
@@ -90,3 +91,80 @@ class TestHimmelblau:
         _, _, Z = surface.meshgrid(resolution=50)
         # Himmelblau is non-negative everywhere
         assert float(Z.min()) >= -1e-5
+
+
+# ---------------------------------------------------------------------------
+# Convergence tests — the most important functional property of any optimizer
+# ---------------------------------------------------------------------------
+
+
+class TestOptimizerConvergence:
+    """
+    Verify that every optimizer actually converges to the QuadraticSurface
+    minimum within a fixed number of steps.
+
+    Why QuadraticSurface(a=1, b=1) (symmetric, not ill-conditioned)?
+      We want to test that the UPDATE RULE is correct, not that the
+      optimizer handles ill-conditioning.  Ill-conditioned tests belong
+      in integration tests.  A symmetric bowl is the minimum surface
+      that any correct gradient descent must converge on.
+
+    Tolerance: 0.05 Euclidean distance from (0, 0).
+    Steps: 500 — generous enough for all variants to converge.
+    """
+
+    SURFACE = QuadraticSurface(a=1.0, b=1.0)
+    START: tuple[float, float] = (-2.0, 2.0)
+    TOLERANCE = 0.05
+    N_STEPS = 500
+
+    def _run_and_check(self, opt: object) -> None:
+        """Run optimizer and assert it reaches the minimum."""
+        self.SURFACE.run_optimizer(opt, start=self.START, n_steps=self.N_STEPS)  # type: ignore[arg-type]
+        final = np.array(opt.trajectory[-1])  # type: ignore[union-attr]
+        optimum = np.array(self.SURFACE.optimum)
+        dist = float(np.linalg.norm(final - optimum))
+        assert dist < self.TOLERANCE, (
+            f"{opt.name} did not converge: "  # type: ignore[union-attr]
+            f"final={final}, dist={dist:.4f} > tol={self.TOLERANCE}"
+        )
+
+    def test_batch_gd_converges(self) -> None:
+        """Full-batch gradient descent on a symmetric quadratic must converge."""
+        self._run_and_check(BatchGD(lr=0.1))
+
+    def test_momentum_sgd_converges(self) -> None:
+        """Momentum SGD with noise_scale=0 (deterministic) must converge."""
+        self._run_and_check(MomentumSGD(lr=0.1, momentum=0.9, noise_scale=0.0))
+
+    def test_rmsprop_converges(self) -> None:
+        """RMSProp must converge on a simple convex surface."""
+        self._run_and_check(RMSProp(lr=0.01))
+
+    def test_adam_converges(self) -> None:
+        """Adam must converge — this is the most important optimizer to verify."""
+        self._run_and_check(Adam(lr=0.05))
+
+    def test_adamw_zero_wd_converges(self) -> None:
+        """AdamW with weight_decay=0 must converge identically to Adam."""
+        self._run_and_check(AdamW(lr=0.05, weight_decay=0.0))
+
+    def test_adamw_with_wd_converges(self) -> None:
+        """
+        AdamW with weight_decay > 0 must still converge.
+        Weight decay adds a pull toward zero which helps on a quadratic
+        centred at the origin (same direction as the gradient).
+        """
+        self._run_and_check(AdamW(lr=0.05, weight_decay=0.01))
+
+    def test_final_loss_is_near_zero(self) -> None:
+        """
+        Beyond just reaching the parameter optimum, verify the loss value
+        at convergence is near zero — catches bugs where the optimizer
+        reaches a wrong point that happens to be close in parameter space.
+        """
+        opt = Adam(lr=0.05)
+        self.SURFACE.run_optimizer(opt, start=self.START, n_steps=self.N_STEPS)
+        final = opt.trajectory[-1]
+        final_loss = float(self.SURFACE(final[0], final[1]))
+        assert final_loss < 0.01, f"Adam converged to a point with non-zero loss: {final_loss:.6f}"
