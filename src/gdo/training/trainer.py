@@ -105,7 +105,7 @@ class Trainer:
         Torch device. Auto-detected if None.
     on_epoch_end:
         Optional callback ``(epoch, metrics) → None`` — used by the
-        Gradio app to stream live metrics to the UI.
+        web UI to stream live metrics.
     """
 
     def __init__(
@@ -225,7 +225,7 @@ class Trainer:
                     else:
                         self.scheduler.step()
 
-            # Callback for Gradio live streaming
+            # Callback for live UI streaming
             if self.on_epoch_end is not None:
                 self.on_epoch_end(epoch, metrics)
 
@@ -250,7 +250,7 @@ class Trainer:
         """
         Generator-based fit that yields EpochMetrics after each epoch.
 
-        Used by the Gradio app to stream live updates without blocking.
+        Used to stream live updates without blocking.
 
         Yields
         ------
@@ -401,7 +401,7 @@ class Trainer:
         cfg:
             Fully validated ExperimentConfig from YAML.
         on_epoch_end:
-            Optional callback for live metric streaming (Gradio app).
+            Optional callback for live metric streaming (e.g. a UI).
         """
         import random
 

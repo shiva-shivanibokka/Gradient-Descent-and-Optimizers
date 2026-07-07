@@ -1,33 +1,25 @@
-version: "3.9"
-
 services:
-  # ── Gradio app ─────────────────────────────────────────────────────────────
-  app:
+  # ── Training runner ───────────────────────────────────────────────────────
+  # One-shot: runs a training experiment, logs to ./mlruns, then exits.
+  #   docker compose run --rm train --config configs/adam_mnist.yaml
+  train:
     build:
       context: .
       target: app
-    ports:
-      - "7860:7860"
     volumes:
-      # Mount mlruns for persistence across container restarts
       - ./mlruns:/app/mlruns
-      # Mount data dir so MNIST/CIFAR-10 downloads persist
       - ./data:/app/data
     environment:
       - PYTHONPATH=/app/src
-    restart: unless-stopped
     deploy:
       resources:
         limits:
           cpus: "2.0"
           memory: 4G
-    healthcheck:
-      test: ["CMD", "python", "-c", "import gdo; print('OK')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-  # ── MLflow tracking server (optional — for viewing experiment results) ────
+  # ── MLflow tracking server ────────────────────────────────────────────────
+  # View experiment results at http://localhost:5000.
+  #   docker compose --profile mlflow up mlflow
   mlflow:
     image: python:3.11-slim
     command: >
@@ -43,5 +35,4 @@ services:
       - ./mlruns:/mlruns
     restart: unless-stopped
     profiles:
-      # Only start with: docker-compose --profile mlflow up
       - mlflow

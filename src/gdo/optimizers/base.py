@@ -13,7 +13,7 @@ The PyTorch optimizers (``torch.optim``) are used separately in the
 Trainer class for actual model training.  These NumPy implementations
 are used for:
   - Loss landscape trajectory visualization (Notebooks 1 & 2)
-  - The Gradio live demo (landscape tab)
+  - The interactive web demo (landscape tab)
   - Unit tests that verify update-rule math
 
 Interface contract

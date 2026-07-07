@@ -11,7 +11,7 @@ Each surface provides:
 
 These surfaces are used to run the NumPy optimizers and visualize
 their trajectories on a 2D contour plot — the core visualization
-in Notebook 1 and the Gradio landscape tab.
+in Notebook 1 and the web landscape tab.
 
 Why analytical surfaces?
 ------------------------

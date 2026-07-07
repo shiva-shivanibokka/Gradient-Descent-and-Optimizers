@@ -7,7 +7,8 @@
 A **production-grade** optimizer benchmarking library and interactive demo.  
 Every major gradient descent variant, adaptive optimizer, and LR scheduler —  
 implemented from scratch in NumPy, tested with pytest, tracked with MLflow,  
-and deployable as a Gradio app on Hugging Face Spaces.
+and paired with an interactive **Next.js web app** (deployed on Vercel) whose
+in-browser TypeScript math is verified against the Python package to six decimals.
 
 ---
 
@@ -34,9 +35,12 @@ Gradient-Descent-and-Optimizers/
 │   ├── 02_adaptive_optimizers.ipynb
 │   └── 03_lr_scheduling_and_techniques.ipynb
 │
-├── app/                        ← Gradio app (3 tabs, deployed to HF Spaces)
-│   ├── app.py
-│   └── components/
+├── web/                        ← Next.js + TypeScript app (client-side, Vercel)
+│   ├── lib/                    ← TS port of surfaces/optimizers/schedulers/MLP
+│   ├── components/             ← loss-surface canvas, charts, three tabs
+│   └── tests/                  ← Vitest parity tests vs the Python package
+│
+├── scripts/dump_reference.py   ← dumps Python reference values → web parity fixtures
 │
 ├── tests/                      ← pytest unit tests (optimizer math verified numerically)
 │
@@ -100,7 +104,7 @@ Gradient-Descent-and-Optimizers/
 # Clone and install (sets up deps + pre-commit hooks)
 git clone https://github.com/shiva-shivanibokka/Gradient-Descent-and-Optimizers
 cd Gradient-Descent-and-Optimizers
-make install            # == pip install -e ".[dev,app]" && pre-commit install
+make install            # == pip install -e ".[dev]" && pre-commit install
 
 # Run a training experiment from the CLI
 python -m gdo --config configs/adam_mnist.yaml
@@ -108,15 +112,24 @@ python -m gdo --config configs/adam_mnist.yaml
 # Common dev tasks (see Makefile)
 make test               # pytest with coverage gate
 make lint               # ruff
-make format             # ruff format
 make type               # mypy
-make app                # launch the Gradio app locally
+make web                # launch the Next.js app at localhost:3000
 
-# Or with Docker
-docker compose up
+# Run a training experiment in Docker
+docker compose run --rm train --config configs/adam_mnist.yaml
 
 # View MLflow experiment results
 mlflow ui               # open http://localhost:5000
+```
+
+### Web app (`web/`)
+
+```bash
+cd web
+npm install
+npm run dev             # http://localhost:3000
+npm test                # Vitest parity suite (TS math == Python gdo to 1e-6)
+npm run build           # production build (deploys to Vercel)
 ```
 
 > `make install` also wires up **pre-commit**, which runs ruff lint + format on every commit
@@ -146,8 +159,10 @@ mlflow ui
 ## Key Design Decisions
 
 **`src/gdo/` is the product — not the notebooks.**  
-Notebooks, the Gradio app, and the CLI all import from the same package.  
-The same `Adam` class that is unit-tested runs in the notebooks and the live demo.
+The notebooks and the CLI all import from the same tested package. The web app
+runs a TypeScript **port** of the same math, kept honest by a parity suite that
+asserts the in-browser results match the Python package to six decimals — so the
+`Adam` update rule verified by `pytest` is the same one running in the browser.
 
 **Configs over code.**  
 Every hyperparameter lives in a YAML file. Changing LR, optimizer, scheduler,  
@@ -189,13 +204,14 @@ that numerically verifies the two produce different results with the same weight
 | Neural network training | PyTorch 2.x |
 | Experiment tracking | MLflow |
 | Config validation | Pydantic v2 |
-| Web app | Gradio 4.x |
-| Tests | pytest |
-| Linting | ruff + black |
-| Type checking | mypy |
+| Web app | Next.js + TypeScript + Tailwind |
+| Web charts | Canvas 2D + Recharts |
+| Tests | pytest (Python) + Vitest (web parity) |
+| Linting | ruff + black + eslint |
+| Type checking | mypy + tsc |
 | Containerization | Docker + docker-compose |
-| CI | GitHub Actions |
-| Deployment | Hugging Face Spaces |
+| CI | GitHub Actions (Python + web jobs) |
+| Deployment | Vercel (web) · Docker (training) |
 
 ---
 

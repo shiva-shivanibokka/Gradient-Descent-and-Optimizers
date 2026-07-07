@@ -7,13 +7,13 @@ LandscapePlotter produces:
   - 2D contour plots with optimizer trajectory overlays
   - Side-by-side multi-optimizer trajectory comparison
   - Convergence curves (loss vs step) for any number of optimizers
-  - Plotly versions of all of the above (for the Gradio app)
+  - Plotly versions of all of the above (for interactive display)
 
 Design note
 -----------
 All plot methods return the figure object rather than calling
 ``plt.show()`` directly.  This makes them composable in notebooks
-(cell output) and usable in the Gradio app (``gr.Plot`` component)
+(cell output) and usable in an interactive web UI
 without side effects.
 """
 
@@ -317,7 +317,7 @@ class LandscapePlotter:
     @classmethod
     def to_plotly(cls, fig: Figure) -> object:
         """
-        Convert a matplotlib Figure to a Plotly Figure for Gradio.
+        Convert a matplotlib Figure to a Plotly Figure for interactive display.
 
         Requires ``plotly`` to be installed.
         """

@@ -1,7 +1,7 @@
-.PHONY: install test lint format type app clean
+.PHONY: install test lint format type web clean
 
 install:
-	pip install -e ".[dev,app]"
+	pip install -e ".[dev]"
 	pre-commit install
 
 test:
@@ -11,13 +11,13 @@ lint:
 	ruff check src/ tests/
 
 format:
-	ruff format src/ tests/ app/
+	ruff format src/ tests/
 
 type:
 	mypy src/gdo/
 
-app:
-	python app/app.py
+web:
+	cd web && npm run dev
 
 clean:
 	rm -rf .pytest_cache .mypy_cache .ruff_cache .coverage htmlcov
