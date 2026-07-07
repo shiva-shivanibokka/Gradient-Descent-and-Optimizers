@@ -14,6 +14,7 @@ Tests verify:
 import math
 
 import pytest
+
 from gdo.optimizers.schedulers import (
     CosineAnnealingLR,
     CyclicalLR,
@@ -194,6 +195,7 @@ def test_warmup_cosine_produces_valid_curve() -> None:
     LR curve when stepped once per epoch (regression: it used step-units for an
     epoch-stepped scheduler, yielding a negative CosineAnnealingLR T_max)."""
     import torch
+
     from gdo.config import (
         ExperimentConfig,
         OptimizerConfig,

@@ -11,9 +11,10 @@ Guards two things:
 """
 
 import torch
+from torch.utils.data import DataLoader, TensorDataset
+
 from gdo.config import TrainConfig
 from gdo.training.trainer import Trainer
-from torch.utils.data import DataLoader, TensorDataset
 
 
 class _FakeLogger:
