@@ -178,6 +178,11 @@ not as L2 regularization added to the gradient. This is a real bug in many imple
 Every optimizer comparison in the notebooks logs to MLflow automatically.  
 `mlflow ui` gives a structured comparison table with metric plots — no manual log parsing.
 
+**Architecture decisions are recorded.**  
+The non-obvious calls — a client-side TS web app over a Python API, and the
+parity suite that keeps the two in sync — are documented as ADRs in
+[`docs/adr/`](docs/adr/).
+
 ---
 
 ## AdamW vs Adam — The Most Important Distinction
