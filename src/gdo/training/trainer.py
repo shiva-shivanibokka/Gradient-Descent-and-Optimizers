@@ -401,7 +401,6 @@ class Trainer:
         import numpy as np
 
         from gdo.config import ModelName
-        from gdo.experiment.logger import ExperimentLogger
         from gdo.training.models import CNN, MLP
 
         # Seed everything
@@ -426,9 +425,9 @@ class Trainer:
         # Build scheduler
         sched = _build_torch_scheduler(cfg, opt, len(train_loader))
 
-        # Build experiment logger
-        exp_logger = ExperimentLogger(cfg.mlflow) if cfg.mlflow.enabled else None
-
+        # MLflow logging is owned by the caller (see __main__), which context-manages
+        # a single ExperimentLogger and calls log_run(). Building one here without
+        # start()ing it would make every per-epoch log call a silent no-op.
         return cls(
             model=model,
             optimizer=opt,
@@ -436,7 +435,7 @@ class Trainer:
             val_loader=val_loader,
             config=cfg.train,
             scheduler=sched,
-            experiment_logger=exp_logger,
+            experiment_logger=None,
             on_epoch_end=on_epoch_end,
         )
 
