@@ -11,8 +11,10 @@ export interface Surface {
   grad(p: Vec): Vec;
   /** Recommended axis limits: [xMin, xMax, yMin, yMax]. */
   domain: [number, number, number, number];
-  /** Known global minimum. */
+  /** Known global minimum (marked with a crosshair). */
   optimum: Vec;
+  /** All global minima, if there are several (e.g. Himmelblau). Defaults to [optimum]. */
+  minima?: Vec[];
   /** Default starting point for trajectory visualization. */
   start: Vec;
 }

@@ -87,7 +87,7 @@ export function LossSurfaceCanvas({
       .filter((p) => p.pts.length >= 2);
 
     const heat = new ImageData(rgba, RES, RES);
-    const [ox, oy] = toPx(surface.optimum);
+    const minima = (surface.minima ?? [surface.optimum]).map(toPx);
     const maxLen = Math.max(2, ...paths.map((p) => p.pts.length));
     const durationMs = Math.min(2200, Math.max(700, maxLen * 6));
     const reduceMotion =
@@ -98,15 +98,17 @@ export function LossSurfaceCanvas({
     const drawFrame = (progress: number) => {
       ctx.putImageData(heat, 0, 0);
 
-      // Optimum crosshair.
+      // Minimum crosshair(s).
       ctx.strokeStyle = "rgba(240,244,250,0.85)";
       ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(ox - 6, oy);
-      ctx.lineTo(ox + 6, oy);
-      ctx.moveTo(ox, oy - 6);
-      ctx.lineTo(ox, oy + 6);
-      ctx.stroke();
+      for (const [mx, my] of minima) {
+        ctx.beginPath();
+        ctx.moveTo(mx - 6, my);
+        ctx.lineTo(mx + 6, my);
+        ctx.moveTo(mx, my - 6);
+        ctx.lineTo(mx, my + 6);
+        ctx.stroke();
+      }
 
       for (const { color, pts } of paths) {
         const head = Math.max(1, Math.floor(progress * (pts.length - 1)));

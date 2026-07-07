@@ -71,14 +71,16 @@ export function CheckList({
   selected,
   onToggle,
   colorOf,
+  wrap = false,
 }: {
   options: string[];
   selected: string[];
   onToggle: (v: string) => void;
   colorOf?: (v: string) => string;
+  wrap?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={wrap ? "flex flex-wrap gap-2" : "flex flex-col gap-1.5"}>
       {options.map((o) => {
         const on = selected.includes(o);
         return (

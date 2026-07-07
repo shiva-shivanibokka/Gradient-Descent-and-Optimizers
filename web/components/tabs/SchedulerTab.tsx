@@ -54,24 +54,30 @@ export function SchedulerTab() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="w-full lg:max-w-md">
-        <Panel
-          title="Controls"
-          help="Each learning-rate schedule is plotted over the chosen number of epochs from your base LR. Toggle schedules to compare their shapes — warmup, decay, cyclical, and one-cycle policies."
-        >
-          <div className="flex flex-col gap-5">
-          <Field label="Base learning rate" hint={baseLr.toFixed(4)}>
-            <Slider value={baseLr} min={0.0005} max={0.1} step={0.0005} onChange={setBaseLr} />
-          </Field>
-          <Field label="Epochs" hint={String(epochs)}>
-            <Slider value={epochs} min={10} max={100} step={5} onChange={setEpochs} />
-          </Field>
-            <Field label="Schedulers">
-              <CheckList options={SCHED_NAMES} selected={selected} onToggle={toggle} colorOf={colorOf} />
+      <Panel
+        title="Controls"
+        help="Each learning-rate schedule is plotted over the chosen number of epochs from your base LR. Toggle schedules to compare their shapes — warmup, decay, cyclical, and one-cycle policies."
+      >
+        <div className="flex flex-col gap-5">
+          <div className="grid gap-5 sm:grid-cols-2 lg:max-w-lg">
+            <Field label="Base learning rate" hint={baseLr.toFixed(4)}>
+              <Slider value={baseLr} min={0.0005} max={0.1} step={0.0005} onChange={setBaseLr} />
+            </Field>
+            <Field label="Epochs" hint={String(epochs)}>
+              <Slider value={epochs} min={10} max={100} step={5} onChange={setEpochs} />
             </Field>
           </div>
-        </Panel>
-      </div>
+          <Field label="Schedulers">
+            <CheckList
+              options={SCHED_NAMES}
+              selected={selected}
+              onToggle={toggle}
+              colorOf={colorOf}
+              wrap
+            />
+          </Field>
+        </div>
+      </Panel>
 
       <div className="flex flex-col gap-3">
         <LineChart series={series} xLabel="epoch" yLabel="learning rate" />

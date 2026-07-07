@@ -47,7 +47,7 @@ function beale(): Surface {
     },
     domain: [-4.5, 4.5, -4.5, 4.5],
     optimum: [3.0, 0.5],
-    start: [-3.5, -3.5],
+    start: [1.0, 1.0], // in the global-minimum basin (Beale has steep off-basin walls)
   };
 }
 
@@ -61,7 +61,14 @@ function himmelblau(): Surface {
     ],
     domain: [-5, 5, -5, 5],
     optimum: [3.0, 2.0],
-    start: [-4.0, -4.0],
+    // Himmelblau has four equal global minima — mark them all.
+    minima: [
+      [3.0, 2.0],
+      [-2.805118, 3.131312],
+      [-3.77931, -3.283186],
+      [3.584428, -1.848126],
+    ],
+    start: [0.0, 0.0], // descends to the (3, 2) basin
   };
 }
 
