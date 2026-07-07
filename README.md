@@ -10,6 +10,8 @@ implemented from scratch in NumPy, tested with pytest, tracked with MLflow,
 and paired with an interactive **Next.js web app** (deployed on Vercel) whose
 in-browser TypeScript math is verified against the Python package to six decimals.
 
+**▶ Live demo: https://gradient-descent-and-optimizers.vercel.app**
+
 ---
 
 ## Repository Structure
