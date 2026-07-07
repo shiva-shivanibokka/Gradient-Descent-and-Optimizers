@@ -588,9 +588,14 @@ def _build_torch_scheduler(
     elif sc.name == SchedulerName.WARMUP_COSINE:
         from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, SequentialLR
 
-        warmup = LinearLR(optimizer, start_factor=0.01, total_iters=sc.warmup_steps)
-        cosine = CosineAnnealingLR(optimizer, T_max=tc.epochs - sc.warmup_steps, eta_min=sc.eta_min)
-        return SequentialLR(optimizer, schedulers=[warmup, cosine], milestones=[sc.warmup_steps])
+        # scheduler.step() is called once per EPOCH by the Trainer, so warmup must
+        # be measured in epochs. Derive it from warmup_steps, clamped so both the
+        # warmup and cosine phases are always >= 1 epoch (avoids negative T_max).
+        warmup_epochs = max(1, min(sc.warmup_steps // max(steps_per_epoch, 1), tc.epochs - 1))
+        cosine_epochs = max(1, tc.epochs - warmup_epochs)
+        warmup = LinearLR(optimizer, start_factor=0.01, total_iters=warmup_epochs)
+        cosine = CosineAnnealingLR(optimizer, T_max=cosine_epochs, eta_min=sc.eta_min)
+        return SequentialLR(optimizer, schedulers=[warmup, cosine], milestones=[warmup_epochs])
     elif sc.name == SchedulerName.REDUCE_ON_PLATEAU:
         return torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer, patience=sc.patience, factor=sc.gamma, threshold=sc.threshold

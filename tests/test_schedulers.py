@@ -187,3 +187,38 @@ class TestReduceLROnPlateau:
         for _ in range(20):
             sched.step(metric=2.0)  # always bad
         assert sched.get_lr() >= 1e-5
+
+
+def test_warmup_cosine_produces_valid_curve() -> None:
+    """The torch WARMUP_COSINE builder must produce a valid warmup-then-decay
+    LR curve when stepped once per epoch (regression: it used step-units for an
+    epoch-stepped scheduler, yielding a negative CosineAnnealingLR T_max)."""
+    import torch
+    from gdo.config import (
+        ExperimentConfig,
+        OptimizerConfig,
+        OptimizerName,
+        SchedulerConfig,
+        SchedulerName,
+        TrainConfig,
+    )
+    from gdo.training.trainer import _build_torch_scheduler
+
+    cfg = ExperimentConfig(
+        optimizer=OptimizerConfig(name=OptimizerName.ADAM, lr=0.01),
+        scheduler=SchedulerConfig(name=SchedulerName.WARMUP_COSINE, warmup_steps=500),
+        train=TrainConfig(epochs=20),
+    )
+    model = torch.nn.Linear(4, 2)
+    opt = torch.optim.Adam(model.parameters(), lr=0.01)
+    sched = _build_torch_scheduler(cfg, opt, steps_per_epoch=700)
+
+    lrs = []
+    for _ in range(cfg.train.epochs):
+        lrs.append(opt.param_groups[0]["lr"])
+        opt.step()
+        sched.step()
+
+    assert all(lr > 0 for lr in lrs)  # no invalid/NaN LR
+    assert lrs[0] < max(lrs)  # warmup rises
+    assert lrs[-1] < max(lrs)  # then decays
