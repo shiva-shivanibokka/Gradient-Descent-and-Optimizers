@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Fully client-side app → export a static site (deployable to any static host).
+  output: "export",
 };
 
 export default nextConfig;
