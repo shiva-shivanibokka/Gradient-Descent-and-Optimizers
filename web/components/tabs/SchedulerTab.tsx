@@ -16,10 +16,12 @@ function optsFor(slug: string, epochs: number, baseLr: number): SchedOpts {
       return { stepSize: Math.max(1, Math.round(epochs / 5)), gamma: 0.5 };
     case "cosine":
       return { tMax: epochs };
+    // maxLr kept at 4× base (not the textbook 10×) so OneCycle/Cyclical don't
+    // dwarf the at-or-below-base schedules (Cosine, Warmup) on the shared axis.
     case "onecycle":
-      return { maxLr: baseLr * 10, totalEpochs: epochs, pctStart: 0.3 };
+      return { maxLr: baseLr * 4, totalEpochs: epochs, pctStart: 0.3 };
     case "cyclical":
-      return { maxLr: baseLr * 10, stepSizeUp: Math.max(1, Math.round(epochs / 6)) };
+      return { maxLr: baseLr * 4, stepSizeUp: Math.max(1, Math.round(epochs / 6)) };
     case "warmup_cosine":
       return { warmupSteps: Math.max(1, Math.round(epochs * 0.15)), totalEpochs: epochs };
     default:
