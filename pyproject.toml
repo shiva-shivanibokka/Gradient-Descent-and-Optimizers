@@ -9,7 +9,7 @@ description = "Gradient Descent and Optimizers — production-grade optimizer be
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Siddharth Bokka" }]
+authors = [{ name = "Shivani Bokka" }]
 
 dependencies = [
     "numpy>=1.26",

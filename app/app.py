@@ -257,7 +257,7 @@ def build_app() -> gr.Blocks:
             # Gradient Descent and Optimizers
             **Interactive optimizer and learning rate scheduler benchmark.**
 
-            Built with [`gdo`](https://github.com/siddharth-bokka/Gradient-Descent-and-Optimizers) —
+            Built with [`gdo`](https://github.com/shiva-shivanibokka/Gradient-Descent-and-Optimizers) —
             a production-grade Python library implementing all optimizers from scratch in NumPy,
             with PyTorch training infrastructure and MLflow experiment tracking.
 

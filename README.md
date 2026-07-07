@@ -94,7 +94,7 @@ Gradient-Descent-and-Optimizers/
 
 ```bash
 # Clone and install
-git clone https://github.com/siddharth-bokka/Gradient-Descent-and-Optimizers
+git clone https://github.com/shiva-shivanibokka/Gradient-Descent-and-Optimizers
 cd Gradient-Descent-and-Optimizers
 pip install -e ".[dev]"
 
@@ -194,4 +194,4 @@ that numerically verifies the two produce different results with the same weight
 
 ## Author
 
-**Siddharth Bokka**
+**Shivani Bokka**

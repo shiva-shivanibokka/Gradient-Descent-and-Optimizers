@@ -12,4 +12,4 @@ Quickstart
 """
 
 __version__ = "0.1.0"
-__author__ = "Siddharth Bokka"
+__author__ = "Shivani Bokka"
