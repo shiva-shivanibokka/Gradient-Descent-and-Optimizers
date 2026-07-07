@@ -1,9 +1,13 @@
 # Gradient Descent and Optimizers
 
+[![CI](https://github.com/shiva-shivanibokka/Gradient-Descent-and-Optimizers/actions/workflows/ci.yml/badge.svg)](https://github.com/shiva-shivanibokka/Gradient-Descent-and-Optimizers/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 A **production-grade** optimizer benchmarking library and interactive demo.  
 Every major gradient descent variant, adaptive optimizer, and LR scheduler —  
 implemented from scratch in NumPy, tested with pytest, tracked with MLflow,  
-and deployed as a live Gradio app on Hugging Face Spaces.
+and deployable as a Gradio app on Hugging Face Spaces.
 
 ---
 
@@ -93,27 +97,30 @@ Gradient-Descent-and-Optimizers/
 ## Quick Start
 
 ```bash
-# Clone and install
+# Clone and install (sets up deps + pre-commit hooks)
 git clone https://github.com/shiva-shivanibokka/Gradient-Descent-and-Optimizers
 cd Gradient-Descent-and-Optimizers
-pip install -e ".[dev]"
+make install            # == pip install -e ".[dev,app]" && pre-commit install
 
 # Run a training experiment from the CLI
 python -m gdo --config configs/adam_mnist.yaml
 
-# Run all tests
-pytest tests/ -v
-
-# Start the Gradio app
-python app/app.py
+# Common dev tasks (see Makefile)
+make test               # pytest with coverage gate
+make lint               # ruff
+make format             # ruff format
+make type               # mypy
+make app                # launch the Gradio app locally
 
 # Or with Docker
 docker compose up
 
 # View MLflow experiment results
-mlflow ui
-# Open http://localhost:5000
+mlflow ui               # open http://localhost:5000
 ```
+
+> `make install` also wires up **pre-commit**, which runs ruff lint + format on every commit
+> so style never drifts. Run it manually anytime with `pre-commit run --all-files`.
 
 ---
 

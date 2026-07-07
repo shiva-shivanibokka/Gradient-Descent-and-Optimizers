@@ -16,6 +16,11 @@ services:
     environment:
       - PYTHONPATH=/app/src
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
     healthcheck:
       test: ["CMD", "python", "-c", "import gdo; print('OK')"]
       interval: 30s
