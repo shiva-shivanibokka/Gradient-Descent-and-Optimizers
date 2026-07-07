@@ -121,9 +121,34 @@ export function Button({ children, onClick }: { children: ReactNode; onClick: ()
   );
 }
 
-export function Panel({ children }: { children: ReactNode }) {
+export function HelpTip({ text }: { text: string }) {
   return (
-    <div className="rounded-xl border border-border bg-panel p-5 shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset]">
+    <span className="helptip" tabIndex={0} role="note" aria-label={text}>
+      <span className="flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-border-bright text-[11px] text-muted transition-colors hover:border-accent hover:text-accent">
+        ?
+      </span>
+      <span className="bubble">{text}</span>
+    </span>
+  );
+}
+
+export function Panel({
+  title,
+  help,
+  children,
+}: {
+  title?: string;
+  help?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="panel rounded-xl p-5">
+      {(title || help) && (
+        <div className="mb-4 flex items-center justify-between gap-2">
+          {title ? <h3 className="eyebrow">{title}</h3> : <span />}
+          {help && <HelpTip text={help} />}
+        </div>
+      )}
       {children}
     </div>
   );

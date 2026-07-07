@@ -19,32 +19,36 @@ export default function Home() {
 
   return (
     <div className="mx-auto flex min-h-full max-w-6xl flex-col px-5 py-8 sm:px-8">
-      <header className="mb-8 border-b border-border pb-6">
+      <header className="mb-8">
         <p className="eyebrow mb-2">Gradient descent · in-browser instrument</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
-          Optimizers, descending.
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          <span className="text-fg">Optimizers, </span>
+          <span className="bg-gradient-to-r from-accent to-[#9b8cff] bg-clip-text text-transparent">
+            descending.
+          </span>
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-          Every optimizer, scheduler, and loss surface — running live in your browser. The math is a
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+          Watch every optimizer descend a loss surface, live in your browser. The math is a
           TypeScript port of the Python{" "}
           <a href={REPO} className="text-accent underline-offset-2 hover:underline">
             gdo
           </a>{" "}
-          package, verified against it to six decimals by a parity test suite. No backend, no waiting.
+          package, verified against it to six decimals by a parity test suite — no backend, no waiting.
         </p>
+        <div className="mt-6 h-px w-full bg-gradient-to-r from-accent/50 via-border-bright to-transparent" />
       </header>
 
-      <nav className="mb-6 flex flex-wrap gap-1" aria-label="Modes">
+      <nav className="mb-6 flex flex-wrap gap-2" aria-label="Modes">
         {TABS.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setActive(t.id)}
             aria-current={active === t.id}
-            className={`rounded-md px-3.5 py-2 text-sm transition-colors ${
+            className={`rounded-lg px-4 py-2 text-sm transition-all ${
               active === t.id
-                ? "bg-panel text-fg shadow-[0_0_0_1px_var(--border-bright)]"
-                : "text-muted hover:text-fg"
+                ? "bg-panel text-fg shadow-[0_0_0_1px_var(--accent),0_0_18px_-6px_var(--accent)]"
+                : "border border-border text-muted hover:border-border-bright hover:text-fg"
             }`}
           >
             {t.label}

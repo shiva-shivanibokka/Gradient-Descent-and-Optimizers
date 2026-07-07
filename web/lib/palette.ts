@@ -17,12 +17,17 @@ export function seriesColor(i: number): string {
   return SERIES[i % SERIES.length];
 }
 
-// Loss-surface colormap: deep navy → teal → pale mint. t in [0, 1].
+// Loss-surface colormap: a desaturated slate-blue ramp. Kept low-saturation on
+// purpose so every saturated trajectory color (teal, violet, green, coral, …)
+// stays legible against it — the surface is context, the trajectories are data.
+// Vibrancy comes from the page glows, the bright basin, and the animation.
+// t in [0, 1].
 const STOPS: [number, [number, number, number]][] = [
-  [0.0, [10, 13, 19]], // bg navy
-  [0.35, [18, 46, 58]], // deep teal
-  [0.7, [30, 120, 120]], // teal
-  [1.0, [150, 230, 210]], // pale mint
+  [0.0, [10, 12, 20]], // near-black (high loss)
+  [0.4, [26, 32, 50]], // dark slate
+  [0.7, [48, 60, 90]], // slate
+  [0.88, [82, 100, 142]], // light slate-blue
+  [1.0, [134, 154, 198]], // bright basin (low loss)
 ];
 
 export function colormap(t: number): [number, number, number] {

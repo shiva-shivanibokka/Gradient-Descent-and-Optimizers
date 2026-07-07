@@ -37,10 +37,58 @@ html {
 }
 
 body {
-  background: var(--bg);
+  /* Layered accent glows so the page reads as an instrument, not a flat void. */
+  background:
+    radial-gradient(1100px 620px at 12% -8%, rgba(56, 225, 198, 0.1), transparent 60%),
+    radial-gradient(1000px 560px at 92% 4%, rgba(155, 140, 255, 0.1), transparent 60%),
+    radial-gradient(900px 700px at 60% 108%, rgba(232, 93, 156, 0.07), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--fg);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Glowing panel edge. */
+.panel {
+  border: 1px solid var(--border-bright);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 40%), var(--panel);
+  box-shadow:
+    0 0 0 1px rgba(56, 225, 198, 0.06),
+    0 0 24px -12px rgba(56, 225, 198, 0.35),
+    0 8px 24px -16px rgba(0, 0, 0, 0.8);
+}
+
+/* Help "?" chip + hover tooltip. */
+.helptip {
+  position: relative;
+  display: inline-flex;
+}
+.helptip > .bubble {
+  position: absolute;
+  top: 150%;
+  right: 0;
+  z-index: 30;
+  width: 15rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-bright);
+  background: var(--panel-2);
+  box-shadow: 0 8px 30px -8px rgba(0, 0, 0, 0.9);
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.15rem;
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition:
+    opacity 0.14s ease,
+    transform 0.14s ease;
+}
+.helptip:hover > .bubble,
+.helptip:focus-within > .bubble {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Eyebrow / section label: uppercase mono, wide tracking. */

@@ -12,10 +12,10 @@ const SURFACE_NAMES = Object.keys(SURFACE_LABELS);
 const OPT_NAMES = Object.keys(OPTIMIZER_LABELS);
 
 export function LandscapeTab() {
-  const [surfaceName, setSurfaceName] = useState("Rosenbrock");
+  const [surfaceName, setSurfaceName] = useState("Quadratic (ill-conditioned)");
   const [selected, setSelected] = useState<string[]>(["Batch GD", "SGD + Momentum", "Adam"]);
-  const [lr, setLr] = useState(0.01);
-  const [steps, setSteps] = useState(200);
+  const [lr, setLr] = useState(0.012);
+  const [steps, setSteps] = useState(300);
 
   const surface = SURFACES[SURFACE_LABELS[surfaceName]];
 
@@ -25,7 +25,9 @@ export function LandscapeTab() {
     return selected.map((name) => ({
       label: name,
       color: colorOf(name),
-      path: descend(surface, OPTIMIZER_LABELS[name], lr, steps),
+      // noiseScale 0 → clean deterministic curves on the 2D landscape (the RNG
+      // jitter is a cosmetic stand-in for stochasticity and reads as messy here).
+      path: descend(surface, OPTIMIZER_LABELS[name], lr, steps, undefined, { noiseScale: 0 }),
     }));
   }, [surface, selected, lr, steps]);
 
@@ -33,8 +35,11 @@ export function LandscapeTab() {
     setSelected((s) => (s.includes(name) ? s.filter((x) => x !== name) : [...s, name]));
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-      <Panel>
+    <div className="grid items-start gap-6 lg:grid-cols-[300px_1fr]">
+      <Panel
+        title="Controls"
+        help="Pick a loss surface and one or more optimizers. Each runs from the same start point for the chosen number of steps at the shared learning rate — then their paths animate down the surface. Lower loss = brighter region; the crosshair is the true minimum."
+      >
         <div className="flex flex-col gap-5">
           <Field label="Loss surface">
             <Select value={surfaceName} onChange={setSurfaceName} options={SURFACE_NAMES} />

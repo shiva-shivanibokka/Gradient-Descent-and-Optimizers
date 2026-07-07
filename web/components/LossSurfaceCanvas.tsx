@@ -1,9 +1,11 @@
 // The signature element: a loss surface rendered as a topographic instrument
-// readout (log-scaled heatmap) with luminous optimizer trajectories traced on it.
+// readout, with optimizer trajectories that ANIMATE — tracing out step by step
+// so you watch the optimizers descend. Dark outlines + white-cored heads keep
+// every trajectory color legible over any part of the surface.
 
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { colormap } from "@/lib/palette";
 import type { Surface, Vec } from "@/lib/types";
@@ -14,7 +16,8 @@ export interface Trajectory {
   path: Vec[];
 }
 
-const RES = 460; // heatmap grid + canvas logical size
+const RES = 520; // heatmap grid + canvas logical size
+const MARGIN = 14; // px beyond the frame before a diverging path is clipped
 
 export function LossSurfaceCanvas({
   surface,
@@ -24,17 +27,18 @@ export function LossSurfaceCanvas({
   trajectories: Trajectory[];
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef<number | undefined>(undefined);
+  const [replay, setReplay] = useState(0);
 
-  // Compute the heatmap RGBA bytes when the surface changes. Kept as a plain
-  // Uint8ClampedArray (server-safe) — the ImageData wrapper is built in the
-  // effect below, since ImageData is a browser-only API.
+  // Heatmap RGBA — recomputed only when the surface changes. Plain typed array
+  // (server-safe); the ImageData wrapper is built in the browser-only effect.
   const rgba = useMemo(() => {
     const [xMin, xMax, yMin, yMax] = surface.domain;
     const vals = new Float64Array(RES * RES);
     let lo = Infinity;
     let hi = -Infinity;
     for (let j = 0; j < RES; j++) {
-      const y = yMax - (j / (RES - 1)) * (yMax - yMin); // top = yMax
+      const y = yMax - (j / (RES - 1)) * (yMax - yMin);
       for (let i = 0; i < RES; i++) {
         const x = xMin + (i / (RES - 1)) * (xMax - xMin);
         const v = Math.log1p(Math.max(0, surface.value([x, y])));
@@ -46,8 +50,7 @@ export function LossSurfaceCanvas({
     const out = new Uint8ClampedArray(RES * RES * 4);
     const span = hi - lo || 1;
     for (let k = 0; k < vals.length; k++) {
-      const t = 1 - (vals[k] - lo) / span; // low loss = bright
-      const [r, g, b] = colormap(t);
+      const [r, g, b] = colormap(1 - (vals[k] - lo) / span); // low loss = brighter
       out[k * 4] = r;
       out[k * 4 + 1] = g;
       out[k * 4 + 2] = b;
@@ -61,66 +64,116 @@ export function LossSurfaceCanvas({
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
     const [xMin, xMax, yMin, yMax] = surface.domain;
     const toPx = ([x, y]: Vec): [number, number] => [
       ((x - xMin) / (xMax - xMin)) * RES,
       (1 - (y - yMin) / (yMax - yMin)) * RES,
     ];
-
-    ctx.putImageData(new ImageData(rgba, RES, RES), 0, 0);
-
-    // Optimum marker.
-    const [ox, oy] = toPx(surface.optimum);
-    ctx.strokeStyle = "rgba(230,234,240,0.7)";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(ox - 5, oy);
-    ctx.lineTo(ox + 5, oy);
-    ctx.moveTo(ox, oy - 5);
-    ctx.lineTo(ox, oy + 5);
-    ctx.stroke();
-
-    // Trajectories with glow. A diverging path is clipped at the point it
-    // first leaves the frame, so divergence reads as "escaped" not as a glitch.
-    const M = 12; // px margin beyond the canvas before we stop drawing
     const inFrame = ([px, py]: [number, number]) =>
-      px >= -M && px <= RES + M && py >= -M && py <= RES + M;
+      px >= -MARGIN && px <= RES + MARGIN && py >= -MARGIN && py <= RES + MARGIN;
 
-    for (const traj of trajectories) {
-      if (traj.path.length < 2) continue;
-      const pts: [number, number][] = [];
-      for (const p of traj.path) {
-        const px = toPx(p);
-        pts.push(px);
-        if (!inFrame(px)) break; // keep the first out-of-frame point, then stop
-      }
-      if (pts.length < 2) continue;
+    // Precompute clipped pixel paths once per change.
+    const paths = trajectories
+      .map((t) => {
+        const pts: [number, number][] = [];
+        for (const p of t.path) {
+          const px = toPx(p);
+          pts.push(px);
+          if (!inFrame(px)) break; // keep the first escaping point, then stop
+        }
+        return { color: t.color, pts };
+      })
+      .filter((p) => p.pts.length >= 2);
 
-      ctx.save();
-      ctx.shadowColor = traj.color;
-      ctx.shadowBlur = 8;
-      ctx.strokeStyle = traj.color;
-      ctx.lineWidth = 1.75;
-      ctx.lineJoin = "round";
-      ctx.beginPath();
-      pts.forEach(([px, py], i) => (i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py)));
-      ctx.stroke();
-      ctx.restore();
+    const heat = new ImageData(rgba, RES, RES);
+    const [ox, oy] = toPx(surface.optimum);
+    const maxLen = Math.max(2, ...paths.map((p) => p.pts.length));
+    const durationMs = Math.min(2200, Math.max(700, maxLen * 6));
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    let start = 0;
 
-      // Start (hollow) + end-of-drawn-path (filled) markers.
-      const [sx, sy] = pts[0];
-      const [ex, ey] = pts[pts.length - 1];
-      ctx.strokeStyle = traj.color;
+    const drawFrame = (progress: number) => {
+      ctx.putImageData(heat, 0, 0);
+
+      // Optimum crosshair.
+      ctx.strokeStyle = "rgba(240,244,250,0.85)";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(sx, sy, 3.5, 0, Math.PI * 2);
+      ctx.moveTo(ox - 6, oy);
+      ctx.lineTo(ox + 6, oy);
+      ctx.moveTo(ox, oy - 6);
+      ctx.lineTo(ox, oy + 6);
       ctx.stroke();
-      ctx.fillStyle = traj.color;
-      ctx.beginPath();
-      ctx.arc(ex, ey, 3.5, 0, Math.PI * 2);
-      ctx.fill();
+
+      for (const { color, pts } of paths) {
+        const head = Math.max(1, Math.floor(progress * (pts.length - 1)));
+        const shown = pts.slice(0, head + 1);
+
+        // Dark outline first → keeps the bright line legible over light regions.
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "rgba(0,0,0,0.55)";
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        shown.forEach(([px, py], i) => (i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py)));
+        ctx.stroke();
+
+        // Glowing colored line.
+        ctx.save();
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        shown.forEach(([px, py], i) => (i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py)));
+        ctx.stroke();
+        ctx.restore();
+
+        // Start ring.
+        const [sx, sy] = pts[0];
+        ctx.strokeStyle = "rgba(255,255,255,0.8)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 4, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Head marker with white core → visible on any background.
+        const [hx, hy] = shown[shown.length - 1];
+        ctx.save();
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(hx, hy, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(hx, hy, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    if (reduceMotion || paths.length === 0) {
+      drawFrame(1);
+      return;
     }
-  }, [surface, rgba, trajectories]);
+
+    const step = (ts: number) => {
+      if (!start) start = ts;
+      const progress = Math.min(1, (ts - start) / durationMs);
+      drawFrame(progress);
+      if (progress < 1) rafRef.current = requestAnimationFrame(step);
+    };
+    rafRef.current = requestAnimationFrame(step);
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [surface, rgba, trajectories, replay]);
 
   return (
     <div className="relative w-full">
@@ -128,21 +181,30 @@ export function LossSurfaceCanvas({
         ref={canvasRef}
         width={RES}
         height={RES}
-        className="aspect-square w-full rounded-lg border border-border"
+        className="aspect-square w-full rounded-xl border border-border-bright shadow-[0_0_0_1px_var(--border-bright),0_0_30px_-8px_var(--accent)]"
       />
+
       {trajectories.length > 0 && (
-        <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1 rounded-md border border-border bg-bg/70 px-2.5 py-2 backdrop-blur-sm">
+        <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1.5 rounded-lg border border-border-bright bg-bg/80 px-3 py-2 backdrop-blur-md">
           {trajectories.map((t) => (
             <div key={t.label} className="flex items-center gap-2 text-xs">
               <span
-                className="h-2 w-4 rounded-full"
-                style={{ background: t.color, boxShadow: `0 0 6px ${t.color}` }}
+                className="h-2.5 w-4 rounded-full"
+                style={{ background: t.color, boxShadow: `0 0 8px ${t.color}` }}
               />
               <span className="text-fg">{t.label}</span>
             </div>
           ))}
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={() => setReplay((r) => r + 1)}
+        className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-lg border border-border-bright bg-bg/80 px-3 py-1.5 text-xs text-fg backdrop-blur-md transition-colors hover:border-accent hover:text-accent"
+      >
+        ▸ Replay
+      </button>
     </div>
   );
 }

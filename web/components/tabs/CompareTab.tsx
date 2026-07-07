@@ -26,10 +26,14 @@ export function CompareTab() {
   }, [opt1, opt2, lr, steps]);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-      <Panel>
-        <div className="flex flex-col gap-5">
-          <Field label="Optimizer A">
+    <div className="flex flex-col gap-6">
+      <div className="w-full lg:max-w-xl">
+        <Panel
+          title="Controls"
+          help="Both optimizers train the same 2-layer MLP on an identical 2-class spiral — same seed, same initialization. Only the update rule differs. The chart below plots cross-entropy loss per step (log scale)."
+        >
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field label="Optimizer A">
             <Select value={opt1} onChange={setOpt1} options={OPT_NAMES} />
           </Field>
           <Field label="Optimizer B">
@@ -38,11 +42,12 @@ export function CompareTab() {
           <Field label="Learning rate" hint={lr.toFixed(4)}>
             <Slider value={lr} min={0.001} max={0.3} step={0.001} onChange={setLr} />
           </Field>
-          <Field label="Training steps" hint={String(steps)}>
-            <Slider value={steps} min={50} max={800} step={50} onChange={setSteps} />
-          </Field>
-        </div>
-      </Panel>
+            <Field label="Training steps" hint={String(steps)}>
+              <Slider value={steps} min={50} max={800} step={50} onChange={setSteps} />
+            </Field>
+          </div>
+        </Panel>
+      </div>
 
       <div className="flex flex-col gap-3">
         <LineChart series={series} xLabel="step" yLabel="cross-entropy loss" logY />
