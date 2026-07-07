@@ -205,7 +205,7 @@ class QuadraticSurface(LossSurface):
         return (0.0, 0.0)
 
     def __call__(self, x: float | np.ndarray, y: float | np.ndarray) -> float | np.ndarray:
-        return self._a * x**2 + self._b * y**2  # type: ignore[return-value]
+        return self._a * x**2 + self._b * y**2
 
     def gradient(self, x: float, y: float) -> np.ndarray:
         return np.array([2.0 * self._a * x, 2.0 * self._b * y])
@@ -251,7 +251,7 @@ class Rosenbrock(LossSurface):
         return (float(self._a), float(self._a**2))
 
     def __call__(self, x: float | np.ndarray, y: float | np.ndarray) -> float | np.ndarray:
-        return (self._a - x) ** 2 + self._b * (y - x**2) ** 2  # type: ignore[return-value]
+        return (self._a - x) ** 2 + self._b * (y - x**2) ** 2
 
     def gradient(self, x: float, y: float) -> np.ndarray:
         dfdx = -2.0 * (self._a - x) - 4.0 * self._b * x * (y - x**2)
@@ -291,7 +291,7 @@ class Beale(LossSurface):
         term1 = (1.5 - x + x * y) ** 2
         term2 = (2.25 - x + x * y**2) ** 2
         term3 = (2.625 - x + x * y**3) ** 2
-        return term1 + term2 + term3  # type: ignore[return-value]
+        return term1 + term2 + term3
 
     def gradient(self, x: float, y: float) -> np.ndarray:
         t1 = 1.5 - x + x * y
@@ -342,7 +342,7 @@ class Himmelblau(LossSurface):
         return self.MINIMA[0]  # return the canonical first minimum
 
     def __call__(self, x: float | np.ndarray, y: float | np.ndarray) -> float | np.ndarray:
-        return (x**2 + y - 11) ** 2 + (x + y**2 - 7) ** 2  # type: ignore[return-value]
+        return (x**2 + y - 11) ** 2 + (x + y**2 - 7) ** 2
 
     def gradient(self, x: float, y: float) -> np.ndarray:
         dfdx = 4 * x * (x**2 + y - 11) + 2 * (x + y**2 - 7)

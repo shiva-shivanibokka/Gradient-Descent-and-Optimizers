@@ -26,6 +26,7 @@ import logging
 import time
 from collections.abc import Callable, Generator
 from dataclasses import dataclass, field
+from typing import Protocol
 
 import torch
 import torch.nn as nn
@@ -35,6 +36,12 @@ from gdo.config import ExperimentConfig, TrainConfig
 from gdo.training.metrics import ConvergenceTracker, EpochMetrics, GradientNormMonitor
 
 logger = logging.getLogger(__name__)
+
+
+class _EpochLogger(Protocol):
+    """Structural type for the optional per-epoch logger (e.g. ExperimentLogger)."""
+
+    def log_epoch(self, epoch: int, metrics: dict[str, float]) -> None: ...
 
 
 @dataclass
@@ -105,11 +112,11 @@ class Trainer:
         self,
         model: nn.Module,
         optimizer: torch.optim.Optimizer,
-        train_loader: DataLoader,  # type: ignore[type-arg]
-        val_loader: DataLoader,  # type: ignore[type-arg]
+        train_loader: DataLoader,
+        val_loader: DataLoader,
         config: TrainConfig,
         scheduler: torch.optim.lr_scheduler.LRScheduler | None = None,
-        experiment_logger: object | None = None,
+        experiment_logger: _EpochLogger | None = None,
         device: torch.device | None = None,
         on_epoch_end: Callable[[int, EpochMetrics], None] | None = None,
     ) -> None:
@@ -205,7 +212,7 @@ class Trainer:
 
             # Log to MLflow
             if self._logger is not None:
-                self._logger.log_epoch(epoch, metrics.to_dict())  # type: ignore[union-attr]
+                self._logger.log_epoch(epoch, metrics.to_dict())
 
             # Scheduler step
             if self.scheduler is not None:
@@ -333,8 +340,8 @@ class Trainer:
             # Record gradient norms AFTER clipping
             if hasattr(self.model, "get_grad_norms"):
                 self._grad_monitor.record(
-                    self.model.get_grad_norms(),  # type: ignore[union-attr]
-                    self.model.get_total_grad_norm(),  # type: ignore[union-attr]
+                    self.model.get_grad_norms(),
+                    self.model.get_total_grad_norm(),
                 )
 
             self.optimizer.step()
@@ -445,7 +452,7 @@ class Trainer:
 # ---------------------------------------------------------------------------
 
 
-def _build_dataloaders(cfg: ExperimentConfig) -> tuple[DataLoader, DataLoader]:  # type: ignore[type-arg]
+def _build_dataloaders(cfg: ExperimentConfig) -> tuple[DataLoader, DataLoader]:
     """Build train and val DataLoaders from config."""
     from torch.utils.data import random_split
     from torchvision import datasets, transforms
@@ -537,7 +544,7 @@ def _build_torch_optimizer(cfg: ExperimentConfig, model: nn.Module) -> torch.opt
         )
     elif name == OptimizerName.LION:
         try:
-            from lion_pytorch import Lion  # type: ignore[import-not-found]
+            from lion_pytorch import Lion
 
             return Lion(params, lr=oc.lr, betas=(oc.beta1, oc.beta), weight_decay=oc.weight_decay)
         except ImportError:

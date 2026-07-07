@@ -34,6 +34,8 @@ dev = [
     "ruff>=0.3",
     "ipykernel>=6.29",
     "notebook>=7.1",
+    "pre-commit>=3.7",
+    "types-PyYAML>=6.0",
 ]
 
 [project.scripts]
@@ -56,6 +58,11 @@ select = ["E", "F", "I", "UP"]
 python_version = "3.10"
 strict = true
 ignore_missing_imports = true
+# NumPy/PyTorch return many values typed as Any and use ungeneric array types;
+# these two strict sub-checks fight scientific-Python code without catching real
+# bugs, so they are disabled while the rest of strict mode stays on.
+disallow_any_generics = false
+warn_return_any = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

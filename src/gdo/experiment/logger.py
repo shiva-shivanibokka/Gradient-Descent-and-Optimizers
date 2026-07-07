@@ -70,7 +70,7 @@ class ExperimentLogger:
 
     def __init__(self, config: MLflowConfig) -> None:
         self.config = config
-        self._run = None
+        self._run: Any = None
         self._active = False
 
     # ------------------------------------------------------------------
@@ -248,7 +248,7 @@ class ExperimentLogger:
     def run_id(self) -> str | None:
         """Active MLflow run ID, or None if not started."""
         if self._run is not None:
-            return self._run.info.run_id  # type: ignore[union-attr]
+            return self._run.info.run_id
         return None
 
     @staticmethod

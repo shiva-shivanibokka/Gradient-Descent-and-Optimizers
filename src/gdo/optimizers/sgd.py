@@ -256,17 +256,18 @@ class MomentumSGD(Optimizer):
         noisy_grads = grads + self._rng.normal(0, self._noise_scale, size=grads.shape)
 
         # Velocity update: v ← β * v - lr * g
-        self._velocity = self._momentum * self._velocity - self._lr * noisy_grads
+        velocity = self._momentum * self._velocity - self._lr * noisy_grads
+        self._velocity = velocity
 
         # Parameter update: θ ← θ + v
-        new_params = params + self._velocity
+        new_params = params + velocity
 
         self._record(new_params)
         logger.debug(
             "[MomentumSGD] step %d | β=%.2f | velocity_norm=%.6f | grad_norm=%.6f",
             self._t,
             self._momentum,
-            float(np.linalg.norm(self._velocity)),
+            float(np.linalg.norm(velocity)),
             float(np.linalg.norm(grads)),
         )
         return new_params
