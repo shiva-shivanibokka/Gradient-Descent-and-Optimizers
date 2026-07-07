@@ -34,7 +34,7 @@ dev = [
     "ipykernel>=6.29",
     "notebook>=7.1",
     "pre-commit>=3.7",
-    "types-PyYAML>=6.0",
+    "types-PyYAML>=6.0.12.20260518",
 ]
 
 [project.scripts]
