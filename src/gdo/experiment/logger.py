@@ -30,6 +30,7 @@ Usage
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -93,6 +94,10 @@ class ExperimentLogger:
         if not _mlflow_available or not self.config.enabled or self._active:
             return
         try:
+            # MLflow 3.14+ raises on the local file store unless this opt-out is set.
+            # This project's default workflow (local ./mlruns + `mlflow ui`) relies on
+            # it, so keep the file store working across mlflow versions.
+            os.environ.setdefault("MLFLOW_ALLOW_FILE_STORE", "true")
             mlflow.set_tracking_uri(self.config.tracking_uri)
             mlflow.set_experiment(self.config.experiment_name)
             self._run = mlflow.start_run(
