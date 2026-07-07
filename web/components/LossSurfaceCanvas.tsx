@@ -80,9 +80,22 @@ export function LossSurfaceCanvas({
     ctx.lineTo(ox, oy + 5);
     ctx.stroke();
 
-    // Trajectories with glow.
+    // Trajectories with glow. A diverging path is clipped at the point it
+    // first leaves the frame, so divergence reads as "escaped" not as a glitch.
+    const M = 12; // px margin beyond the canvas before we stop drawing
+    const inFrame = ([px, py]: [number, number]) =>
+      px >= -M && px <= RES + M && py >= -M && py <= RES + M;
+
     for (const traj of trajectories) {
       if (traj.path.length < 2) continue;
+      const pts: [number, number][] = [];
+      for (const p of traj.path) {
+        const px = toPx(p);
+        pts.push(px);
+        if (!inFrame(px)) break; // keep the first out-of-frame point, then stop
+      }
+      if (pts.length < 2) continue;
+
       ctx.save();
       ctx.shadowColor = traj.color;
       ctx.shadowBlur = 8;
@@ -90,17 +103,13 @@ export function LossSurfaceCanvas({
       ctx.lineWidth = 1.75;
       ctx.lineJoin = "round";
       ctx.beginPath();
-      traj.path.forEach((p, i) => {
-        const [px, py] = toPx(p);
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      });
+      pts.forEach(([px, py], i) => (i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py)));
       ctx.stroke();
       ctx.restore();
 
-      // Start (hollow) + end (filled) markers.
-      const [sx, sy] = toPx(traj.path[0]);
-      const [ex, ey] = toPx(traj.path[traj.path.length - 1]);
+      // Start (hollow) + end-of-drawn-path (filled) markers.
+      const [sx, sy] = pts[0];
+      const [ex, ey] = pts[pts.length - 1];
       ctx.strokeStyle = traj.color;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
