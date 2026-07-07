@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 
 logger = logging.getLogger(__name__)
 
@@ -224,11 +224,6 @@ class ExperimentConfig(BaseModel):
     mlflow: MLflowConfig = Field(default_factory=MLflowConfig)
     mlp: MlpConfig = Field(default_factory=MlpConfig)
     cnn: CnnConfig = Field(default_factory=CnnConfig)
-
-    @model_validator(mode="after")
-    def sync_scheduler_total_steps(self) -> ExperimentConfig:
-        """Ensure OneCycleLR has total_steps consistent with epoch + batch counts."""
-        return self
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> ExperimentConfig:

@@ -5,9 +5,9 @@ CLI entrypoint for running training experiments.
 
 Usage
 -----
-    python -m gdo.train --config configs/adam_mnist.yaml
-    python -m gdo.train --config configs/adam_mnist.yaml --run-name my-run
-    python -m gdo.train --config configs/adam_mnist.yaml --no-mlflow
+    python -m gdo --config configs/adam_mnist.yaml
+    python -m gdo --config configs/adam_mnist.yaml --run-name my-run
+    python -m gdo --config configs/adam_mnist.yaml --no-mlflow
 """
 
 from __future__ import annotations
