@@ -27,7 +27,6 @@ from typing import TYPE_CHECKING
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 if TYPE_CHECKING:
     from gdo.config import CnnConfig, MlpConfig
@@ -55,7 +54,7 @@ class MLP(nn.Module):
     the saturation issue with post-activation BatchNorm.
     """
 
-    def __init__(self, config: "MlpConfig") -> None:
+    def __init__(self, config: MlpConfig) -> None:
         super().__init__()
         self.config = config
 
@@ -160,7 +159,7 @@ class CNN(nn.Module):
         ``CnnConfig`` from ``gdo.config``.
     """
 
-    def __init__(self, config: "CnnConfig") -> None:
+    def __init__(self, config: CnnConfig) -> None:
         super().__init__()
         self.config = config
 
@@ -203,7 +202,7 @@ class CNN(nn.Module):
                 nn.init.kaiming_normal_(module.weight, nonlinearity="relu")
                 if module.bias is not None:
                     nn.init.zeros_(module.bias)
-            elif isinstance(module, (nn.BatchNorm2d, nn.BatchNorm1d)):
+            elif isinstance(module, nn.BatchNorm2d | nn.BatchNorm1d):
                 nn.init.ones_(module.weight)
                 nn.init.zeros_(module.bias)
 
@@ -243,7 +242,7 @@ class CNN(nn.Module):
         return total_norm**0.5
 
 
-def build_model(config: "MlpConfig | CnnConfig") -> nn.Module:
+def build_model(config: MlpConfig | CnnConfig) -> nn.Module:
     """
     Factory function: build the correct model from config type.
 

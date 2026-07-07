@@ -18,10 +18,8 @@ These classes are used by the Trainer to:
 from __future__ import annotations
 
 import logging
-import warnings
 from collections import deque
-from dataclasses import dataclass, field
-from typing import Deque
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -236,7 +234,7 @@ class GradientNormMonitor:
         self._global_norms: list[float] = []
         self._layer_norms: dict[str, list[float]] = {}
         self._explosion_count: int = 0
-        self._rolling: Deque[float] = deque(maxlen=window)
+        self._rolling: deque[float] = deque(maxlen=window)
 
     def record(self, layer_norms: dict[str, float], global_norm: float) -> None:
         """

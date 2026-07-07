@@ -12,12 +12,9 @@ Tests verify:
   5. All optimizers reset cleanly
 """
 
-import math
 
 import numpy as np
-import pytest
-
-from gdo.optimizers.adaptive import AdamW, Adam, Lion, RMSProp
+from gdo.optimizers.adaptive import Adam, AdamW, Lion, RMSProp
 
 
 class TestRMSProp:

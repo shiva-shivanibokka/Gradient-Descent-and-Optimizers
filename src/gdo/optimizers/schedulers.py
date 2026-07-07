@@ -293,7 +293,7 @@ class CyclicalLR(LRScheduler):
     ) -> None:
         super().__init__(optimizer_lr)
         if max_lr <= optimizer_lr:
-            raise ValueError(f"max_lr must be > base_lr")
+            raise ValueError("max_lr must be > base_lr")
         if mode not in ("triangular", "triangular2"):
             raise ValueError(f"mode must be 'triangular' or 'triangular2', got {mode}")
         self._max_lr = max_lr

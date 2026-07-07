@@ -1,13 +1,13 @@
 """Loss surface definitions and visualization utilities."""
 
+from gdo.landscapes.plotter import LandscapePlotter
 from gdo.landscapes.surfaces import (
+    Beale,
+    Himmelblau,
     LossSurface,
     QuadraticSurface,
     Rosenbrock,
-    Beale,
-    Himmelblau,
 )
-from gdo.landscapes.plotter import LandscapePlotter
 
 __all__ = [
     "LossSurface",

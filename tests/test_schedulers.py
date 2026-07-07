@@ -13,9 +13,7 @@ Tests verify:
 
 import math
 
-import numpy as np
 import pytest
-
 from gdo.optimizers.schedulers import (
     CosineAnnealingLR,
     CyclicalLR,

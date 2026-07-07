@@ -68,7 +68,7 @@ class ExperimentLogger:
     ...     log.log_run(result)
     """
 
-    def __init__(self, config: "MLflowConfig") -> None:
+    def __init__(self, config: MLflowConfig) -> None:
         self.config = config
         self._run = None
         self._active = False
@@ -77,7 +77,7 @@ class ExperimentLogger:
     # Context manager
     # ------------------------------------------------------------------
 
-    def __enter__(self) -> "ExperimentLogger":
+    def __enter__(self) -> ExperimentLogger:
         self.start()
         return self
 
@@ -151,7 +151,7 @@ class ExperimentLogger:
         except Exception as e:
             logger.warning("[ExperimentLogger] log_metric '%s' failed: %s", key, e)
 
-    def log_summary(self, result: "TrainingResult") -> None:
+    def log_summary(self, result: TrainingResult) -> None:
         """
         Log a complete ``TrainingResult`` to MLflow.
 
@@ -178,7 +178,7 @@ class ExperimentLogger:
         except Exception as e:
             logger.warning("[ExperimentLogger] log_summary failed: %s", e)
 
-    def log_run(self, result: "TrainingResult", experiment_config: Any = None) -> None:
+    def log_run(self, result: TrainingResult, experiment_config: Any = None) -> None:
         """
         Log a complete training run in one call.
 

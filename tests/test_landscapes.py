@@ -13,7 +13,6 @@ Tests verify:
 
 import numpy as np
 import pytest
-
 from gdo.landscapes import Beale, Himmelblau, QuadraticSurface, Rosenbrock
 from gdo.optimizers import Adam, AdamW, BatchGD, MomentumSGD, RMSProp
 

@@ -24,8 +24,8 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Callable, Generator
 from dataclasses import dataclass, field
-from typing import Callable, Generator
 
 import torch
 import torch.nn as nn
@@ -378,7 +378,7 @@ class Trainer:
         cls,
         cfg: ExperimentConfig,
         on_epoch_end: Callable[[int, EpochMetrics], None] | None = None,
-    ) -> "Trainer":
+    ) -> Trainer:
         """
         Build a fully configured Trainer from an ExperimentConfig.
 
@@ -400,7 +400,7 @@ class Trainer:
 
         import numpy as np
 
-        from gdo.config import DatasetName, ModelName, SchedulerName, OptimizerName
+        from gdo.config import ModelName
         from gdo.experiment.logger import ExperimentLogger
         from gdo.training.models import CNN, MLP
 
@@ -586,7 +586,7 @@ def _build_torch_scheduler(
             mode="triangular2",
         )
     elif sc.name == SchedulerName.WARMUP_COSINE:
-        from torch.optim.lr_scheduler import LinearLR, CosineAnnealingLR, SequentialLR
+        from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, SequentialLR
 
         warmup = LinearLR(optimizer, start_factor=0.01, total_iters=sc.warmup_steps)
         cosine = CosineAnnealingLR(optimizer, T_max=tc.epochs - sc.warmup_steps, eta_min=sc.eta_min)

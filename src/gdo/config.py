@@ -226,12 +226,12 @@ class ExperimentConfig(BaseModel):
     cnn: CnnConfig = Field(default_factory=CnnConfig)
 
     @model_validator(mode="after")
-    def sync_scheduler_total_steps(self) -> "ExperimentConfig":
+    def sync_scheduler_total_steps(self) -> ExperimentConfig:
         """Ensure OneCycleLR has total_steps consistent with epoch + batch counts."""
         return self
 
     @classmethod
-    def from_yaml(cls, path: str | Path) -> "ExperimentConfig":
+    def from_yaml(cls, path: str | Path) -> ExperimentConfig:
         """
         Load and validate an ExperimentConfig from a YAML file.
 

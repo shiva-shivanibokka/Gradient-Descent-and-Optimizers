@@ -13,8 +13,7 @@ Tests verify:
 
 import numpy as np
 import pytest
-
-from gdo.optimizers.sgd import BatchGD, MomentumSGD, MiniBatchGD, StochasticGD
+from gdo.optimizers.sgd import BatchGD, MomentumSGD
 
 
 class TestBatchGD:

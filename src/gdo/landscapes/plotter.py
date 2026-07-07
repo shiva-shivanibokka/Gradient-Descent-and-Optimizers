@@ -74,8 +74,8 @@ class LandscapePlotter:
     @classmethod
     def contour(
         cls,
-        surface: "LossSurface",
-        optimizers: list["Optimizer"] | None = None,
+        surface: LossSurface,
+        optimizers: list[Optimizer] | None = None,
         resolution: int = 300,
         log_scale: bool = True,
         figsize: tuple[float, float] = (8, 6),
@@ -160,8 +160,8 @@ class LandscapePlotter:
     @classmethod
     def trajectory_comparison(
         cls,
-        surface: "LossSurface",
-        optimizers: list["Optimizer"],
+        surface: LossSurface,
+        optimizers: list[Optimizer],
         resolution: int = 250,
         figsize: tuple[float, float] | None = None,
     ) -> Figure:
@@ -214,7 +214,7 @@ class LandscapePlotter:
     @classmethod
     def convergence_curves(
         cls,
-        optimizers: list["Optimizer"],
+        optimizers: list[Optimizer],
         figsize: tuple[float, float] = (9, 5),
         log_scale: bool = True,
         title: str = "Convergence Curves — Loss vs Step",
