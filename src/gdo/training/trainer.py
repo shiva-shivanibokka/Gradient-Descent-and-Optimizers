@@ -26,7 +26,7 @@ import logging
 import time
 from collections.abc import Callable, Generator
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import Any, Protocol, cast
 
 import torch
 import torch.nn as nn
@@ -337,12 +337,12 @@ class Trainer:
             if self.config.grad_clip is not None:
                 nn.utils.clip_grad_norm_(self.model.parameters(), self.config.grad_clip)
 
-            # Record gradient norms AFTER clipping
+            # Record gradient norms AFTER clipping. get_grad_norms/get_total_grad_norm
+            # are defined on our MLP/CNN models, not on the base nn.Module — cast so
+            # type-checking is stable across torch stub versions.
             if hasattr(self.model, "get_grad_norms"):
-                self._grad_monitor.record(
-                    self.model.get_grad_norms(),
-                    self.model.get_total_grad_norm(),
-                )
+                model = cast("Any", self.model)
+                self._grad_monitor.record(model.get_grad_norms(), model.get_total_grad_norm())
 
             self.optimizer.step()
 
