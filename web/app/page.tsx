@@ -1,65 +1,66 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+
+import { CompareTab } from "@/components/tabs/CompareTab";
+import { LandscapeTab } from "@/components/tabs/LandscapeTab";
+import { SchedulerTab } from "@/components/tabs/SchedulerTab";
+
+const TABS = [
+  { id: "landscape", label: "Loss landscape", node: <LandscapeTab /> },
+  { id: "compare", label: "Optimizer comparison", node: <CompareTab /> },
+  { id: "scheduler", label: "Scheduler explorer", node: <SchedulerTab /> },
+] as const;
+
+const REPO = "https://github.com/shiva-shivanibokka/Gradient-Descent-and-Optimizers";
 
 export default function Home() {
+  const [active, setActive] = useState<(typeof TABS)[number]["id"]>("landscape");
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="mx-auto flex min-h-full max-w-6xl flex-col px-5 py-8 sm:px-8">
+      <header className="mb-8 border-b border-border pb-6">
+        <p className="eyebrow mb-2">Gradient descent · in-browser instrument</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
+          Optimizers, descending.
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+          Every optimizer, scheduler, and loss surface — running live in your browser. The math is a
+          TypeScript port of the Python{" "}
+          <a href={REPO} className="text-accent underline-offset-2 hover:underline">
+            gdo
+          </a>{" "}
+          package, verified against it to six decimals by a parity test suite. No backend, no waiting.
+        </p>
+      </header>
+
+      <nav className="mb-6 flex flex-wrap gap-1" aria-label="Modes">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setActive(t.id)}
+            aria-current={active === t.id}
+            className={`rounded-md px-3.5 py-2 text-sm transition-colors ${
+              active === t.id
+                ? "bg-panel text-fg shadow-[0_0_0_1px_var(--border-bright)]"
+                : "text-muted hover:text-fg"
+            }`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
+      <main className="flex-1">{TABS.find((t) => t.id === active)!.node}</main>
+
+      <footer className="mt-12 border-t border-border pt-5 text-xs text-faint">
+        <span className="num">gdo</span> · optimizer implementations verified in Python, ported to
+        TypeScript for the web ·{" "}
+        <a href={REPO} className="text-muted hover:text-accent">
+          source
+        </a>
+      </footer>
     </div>
   );
 }
