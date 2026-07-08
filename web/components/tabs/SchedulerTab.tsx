@@ -83,11 +83,35 @@ export function SchedulerTab() {
 
       <div className="flex flex-col gap-3">
         <LineChart series={series} xLabel="epoch" yLabel="learning rate" />
-        <p className="text-sm text-muted">
-          Learning-rate schedules over {epochs} epochs from a base of{" "}
-          <span className="num text-fg">{baseLr.toFixed(4)}</span>. Warmup + Cosine is the Transformer
-          standard; OneCycle is the fast.ai recipe.
-        </p>
+        <div className="rounded-lg border border-border bg-panel/60 p-4 text-sm leading-6 text-muted">
+          <p className="eyebrow mb-2">About this tab</p>
+          <p>
+            A <span className="text-fg">learning-rate scheduler</span> changes the learning rate as
+            training progresses instead of holding it fixed. Each curve is the LR an optimizer would
+            use at every epoch under that policy — here over {epochs} epochs from a base of{" "}
+            <span className="num text-fg">{baseLr.toFixed(4)}</span>. Toggle schedules to compare their
+            shapes:
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>
+              <span className="text-fg">StepLR</span> drops the LR by a factor at fixed intervals;{" "}
+              <span className="text-fg">CosineAnnealingLR</span> decays it smoothly to near zero.
+            </li>
+            <li>
+              <span className="text-fg">Warmup + Cosine</span> ramps up first, then decays — the
+              Transformer standard, since a cold start at full LR is unstable.
+            </li>
+            <li>
+              <span className="text-fg">OneCycle</span> (fast.ai) and{" "}
+              <span className="text-fg">Cyclical</span> push the LR above the base before annealing,
+              which can speed up training and help escape sharp minima.
+            </li>
+          </ul>
+          <p className="mt-2">
+            Picking the right schedule often means faster convergence and better final accuracy than a
+            constant LR.
+          </p>
+        </div>
       </div>
     </div>
   );
