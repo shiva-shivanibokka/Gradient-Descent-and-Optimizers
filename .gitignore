@@ -57,3 +57,6 @@ htmlcov/
 
 # Ruff
 .ruff_cache/
+
+# Internal workflow planning/brainstorming artifacts — not part of the published repo
+docs/superpowers/
