@@ -30,11 +30,7 @@ function optsFor(slug: string, epochs: number, baseLr: number): SchedOpts {
 }
 
 export function SchedulerTab() {
-  const [selected, setSelected] = useState<string[]>([
-    "CosineAnnealingLR",
-    "OneCycleLR",
-    "Warmup + Cosine",
-  ]);
+  const [selected, setSelected] = useState<string[]>([]);
   const [baseLr, setBaseLr] = useState(0.01);
   const [epochs, setEpochs] = useState(50);
 

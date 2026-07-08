@@ -23,7 +23,7 @@ const SURFACE_DEFAULTS: Record<string, { lr: number; steps: number; opts: string
 
 export function LandscapeTab() {
   const [surfaceName, setSurfaceName] = useState("Quadratic (ill-conditioned)");
-  const [selected, setSelected] = useState<string[]>(SURFACE_DEFAULTS.quadratic.opts);
+  const [selected, setSelected] = useState<string[]>(["Batch GD"]);
   const [lr, setLr] = useState(SURFACE_DEFAULTS.quadratic.lr);
   const [steps, setSteps] = useState(SURFACE_DEFAULTS.quadratic.steps);
 
