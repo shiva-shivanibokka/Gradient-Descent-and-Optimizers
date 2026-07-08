@@ -187,6 +187,31 @@ class TestTrainerFactories:
         else:
             assert sched is not None
 
+    def test_onecycle_schedule_runs(self) -> None:
+        # OneCycle must rise toward max_lr then anneal when stepped ONCE PER EPOCH,
+        # the way Trainer.fit() drives it. Guards the per-batch/per-epoch mismatch:
+        # if built with steps_per_epoch*epochs total_steps, per-epoch stepping only
+        # advances a fraction of the cycle and the LR never leaves its low start.
+        epochs = 10
+        cfg = ExperimentConfig(
+            optimizer=OptimizerConfig(name=OptimizerName.ADAM, lr=0.001),
+            scheduler=SchedulerConfig(name=SchedulerName.ONECYCLE, max_lr=0.1, pct_start=0.3),
+            train=TrainConfig(epochs=epochs),
+        )
+        model = torch.nn.Linear(4, 2)
+        opt = _build_torch_optimizer(cfg, model)
+        sched = _build_torch_scheduler(cfg, opt, steps_per_epoch=100)
+        assert sched is not None
+        lrs = []
+        for _ in range(epochs):
+            opt.step()
+            sched.step()
+            lrs.append(opt.param_groups[0]["lr"])
+        # Peak approaches max_lr (proves warmup happened); final falls back below the
+        # peak (proves annealing happened).
+        assert max(lrs) > 0.05, f"OneCycle never warmed up: peak LR was {max(lrs):.4g}"
+        assert lrs[-1] < max(lrs), "OneCycle never annealed back down"
+
 
 # ---------------------------------------------------------------------------
 # ExperimentLogger

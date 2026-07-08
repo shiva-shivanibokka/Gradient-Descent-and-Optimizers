@@ -158,6 +158,16 @@ class TestWarmupScheduler:
         post_warmup = lrs[5:]
         assert all(a >= b - 1e-9 for a, b in zip(post_warmup, post_warmup[1:]))
 
+    def test_rejects_nonpositive_warmup(self) -> None:
+        # warmup_steps=0 is a valid SchedulerConfig value (ge=0) but the step() math
+        # divides by it — validate at construction, like every sibling scheduler does.
+        with pytest.raises(ValueError):
+            WarmupScheduler(optimizer_lr=0.1, total_epochs=30, warmup_steps=0)
+
+    def test_rejects_nonpositive_total_epochs(self) -> None:
+        with pytest.raises(ValueError):
+            WarmupScheduler(optimizer_lr=0.1, total_epochs=0, warmup_steps=5)
+
 
 class TestReduceLROnPlateau:
     def test_no_reduction_while_improving(self) -> None:

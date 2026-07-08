@@ -358,6 +358,10 @@ class WarmupScheduler(LRScheduler):
         eta_min: float = 0.0,
     ) -> None:
         super().__init__(optimizer_lr)
+        if warmup_steps <= 0:
+            raise ValueError(f"warmup_steps must be > 0, got {warmup_steps}")
+        if total_epochs <= 0:
+            raise ValueError(f"total_epochs must be > 0, got {total_epochs}")
         self._total_epochs = total_epochs
         self._warmup_steps = warmup_steps
         self._eta_min = eta_min

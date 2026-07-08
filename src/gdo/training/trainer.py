@@ -576,11 +576,13 @@ def _build_torch_scheduler(
             optimizer, T_max=sc.t_max, eta_min=sc.eta_min
         )
     elif sc.name == SchedulerName.ONECYCLE:
+        # The Trainer steps the scheduler once per EPOCH, so total_steps must be the
+        # epoch count — NOT epochs * steps_per_epoch (which assumes per-batch steps and
+        # would leave the LR frozen near its low initial value the whole run).
         return torch.optim.lr_scheduler.OneCycleLR(
             optimizer,
             max_lr=sc.max_lr,
-            steps_per_epoch=steps_per_epoch,
-            epochs=tc.epochs,
+            total_steps=tc.epochs,
             pct_start=sc.pct_start,
         )
     elif sc.name == SchedulerName.CYCLICAL:
