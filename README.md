@@ -181,7 +181,7 @@ Every optimizer comparison in the notebooks logs to MLflow automatically.
 **Architecture decisions are recorded.**  
 The non-obvious calls — a client-side TS web app over a Python API, and the
 parity suite that keeps the two in sync — are documented as ADRs in
-[`docs/adr/`](docs/adr/).
+the commit history (the ADR directory this once linked to was removed).
 
 ---
 
